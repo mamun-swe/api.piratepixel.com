@@ -16,7 +16,7 @@ const categorySchema = new Schema({
     },
     images: [{
         type: Schema.Types.ObjectId,
-        ref: 'Product',
+        ref: 'Image',
         default: null
     }]
 }, {

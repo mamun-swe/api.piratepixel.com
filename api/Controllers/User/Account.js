@@ -1,142 +1,130 @@
 
-// const bcrypt = require("bcryptjs")
-// const Customer = require("../../../Models/Customer")
-// const Validator = require("../../Validator/Customer")
+const User = require("../../../Models/User")
+const Validator = require("../../Validator/UserAccount")
+const { Host, FileUpload, DeleteFile } = require("../../Helpers/Index")
 
-// // My profile
-// const MyProfile = async (req, res, next) => {
-//     try {
-//         const { id } = req.user
-//         const result = await Customer.findById(
-//             { _id: id },
-//             { password: 0 }
-//         )
-//             .exec()
+// My profile
+const Profile = async (req, res, next) => {
+    try {
+        const { id } = req.user
+        let result = await User.findById(
+            { _id: id },
+            {
+                name: 1,
+                city: 1,
+                country: 1,
+                image: 1
+            }
+        ).exec()
 
-//         res.status(200).json({
-//             status: true,
-//             data: result || null
-//         })
-//     } catch (error) {
-//         if (error) next(error)
-//     }
-// }
+        if (result) result.image = result.image ? Host(req) + "uploads/users/" + result.image : null
 
-// // Update Account
-// const UpdateAccount = async (req, res, next) => {
-//     try {
-//         let isUpdateAccount
-//         const user = req.user.id
-//         const { name, email, gender, maritalStatus, dob } = req.body
+        res.status(200).json({
+            status: true,
+            data: result || null
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
 
-//         // validate check
-//         const validate = await Validator.Update(req.body)
-//         if (!validate.isValid) {
-//             return res.status(422).json({
-//                 status: false,
-//                 message: validate.error
-//             })
-//         }
+// Update Profile
+const UpdateProfile = async (req, res, next) => {
+    try {
+        const { id } = req.user
+        const { name, city, country } = req.body
 
-//         // Check email
-//         if (email) {
-//             const existAccount = await Customer.findOne({ email: email }).exec()
+        // validate check
+        const validate = await Validator.UpdateAccount(req.body)
+        if (!validate.isValid) {
+            return res.status(422).json({
+                status: false,
+                message: validate.error
+            })
+        }
 
-//             if (existAccount) {
+        const isUpdateAccount = await User.findByIdAndUpdate(
+            { _id: id },
+            { $set: { name, city, country } },
+            { $multi: false }
+        ).exec()
 
-//                 // Update account
-//                 isUpdateAccount = await Customer.findOneAndUpdate(
-//                     { _id: user },
-//                     { $set: { name, gender, maritalStatus, dob } },
-//                     { $multi: false }
-//                 ).exec()
-//             } else {
-//                 // Update account
-//                 isUpdateAccount = await User.findOneAndUpdate(
-//                     { _id: user },
-//                     { $set: { name, email: email, gender, maritalStatus, dob } },
-//                     { $multi: false }
-//                 ).exec()
-//             }
-//         }
+        if (!isUpdateAccount) {
+            return res.status(404).json({
+                status: false,
+                message: 'Failed to update account.'
+            })
+        }
 
-//         if (!isUpdateAccount) {
-//             return res.status(404).json({
-//                 status: false,
-//                 message: 'Failed to update account.'
-//             })
-//         }
+        res.status(201).json({
+            status: true,
+            message: "Successfully account updated."
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
 
-//         res.status(201).json({
-//             status: true,
-//             message: "Successfully account updated."
-//         })
-//     } catch (error) {
-//         if (error) next(error)
-//     }
-// }
+// Upload Profile Image
+const UploadProfileImage = async (req, res, next) => {
+    try {
+        const { id } = req.user
+        const file = req.files
 
-// // Update password
-// const UpdatePassword = async (req, res, next) => {
-//     try {
-//         const { id } = req.user
-//         const { oldPassword, newPassword } = req.body
+        // validate check
+        if (!file) {
+            return res.status(422).json({
+                status: false,
+                image: "Image is required."
+            })
+        }
 
-//         // validate check
-//         const validate = await Validator.PasswordChange(req.body)
-//         if (!validate.isValid) {
-//             return res.status(422).json({
-//                 status: false,
-//                 message: validate.error
-//             })
-//         }
+        // Check & remove old file
+        const isExistAccount = await User.findById({ _id: id }, { image: 1 })
+        if (!isExistAccount) {
+            return res.status(404).json({
+                status: false,
+                message: "Account not found."
+            })
+        }
 
-//         // find account
-//         const foundAccount = await Customer.findById({ _id: id }, { password: 1 })
-//         if (!foundAccount) {
-//             return res.status(422).json({
-//                 status: false,
-//                 message: "Account not found."
-//             })
-//         }
+        if (isExistAccount && isExistAccount.image) {
+            await DeleteFile('./uploads/users/', isExistAccount.image)
+        }
 
-//         // Compare with old password
-//         const isCorrectPassword = await bcrypt.compare(oldPassword, foundAccount.password)
-//         if (!isCorrectPassword) {
-//             return res.status(404).json({
-//                 status: false,
-//                 message: "Old password doesn't match."
-//             })
-//         }
+        const uploadFile = await FileUpload(file.image, './uploads/users/')
+        if (!uploadFile) {
+            return res.status(501).json({
+                status: false,
+                message: 'Failed to upload image'
+            })
+        }
 
-//         // Password Hash
-//         const hashNewPassword = await bcrypt.hash(newPassword, 10)
+        const isUpdateAccount = await User.findByIdAndUpdate(
+            { _id: id },
+            { $set: { image: uploadFile } },
+            { $multi: false }
+        ).exec()
 
-//         // Update account
-//         const updateAccount = await Customer.findOneAndUpdate(
-//             { _id: id },
-//             { $set: { password: hashNewPassword } },
-//             { $multi: false }
-//         ).exec()
+        if (!isUpdateAccount) {
+            return res.status(404).json({
+                status: false,
+                message: 'Failed to upload.'
+            })
+        }
 
-//         if (!updateAccount) {
-//             return res.status(404).json({
-//                 status: false,
-//                 message: "Failed to update password"
-//             })
-//         }
+        res.status(201).json({
+            status: true,
+            message: 'Successfully profile updated'
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
 
-//         res.status(201).json({
-//             status: true,
-//             message: "Successfully password updated."
-//         })
-//     } catch (error) {
-//         if (error) next(error)
-//     }
-// }
 
-// module.exports = {
-//     MyProfile,
-//     UpdateAccount,
-//     UpdatePassword
-// }
+module.exports = {
+    Profile,
+    UpdateProfile,
+    UploadProfileImage
+}

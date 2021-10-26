@@ -1,11 +1,10 @@
-// const express = require('express')
-// const customerRouter = express.Router()
-// // const Account = require("../Controllers/Customer/Account")
+const express = require('express')
+const UserRouter = express.Router()
+const Account = require("../Controllers/User/Account")
 
-// // // ----------- Customer Account Routes ------------
-// // customerRouter.get("/me", Account.MyProfile)
-// // customerRouter.put('/me', Account.UpdateAccount)
-// // customerRouter.put('/change-password', Account.UpdatePassword)
+// ----------- User Account Routes ------------
+UserRouter.get("/me", Account.Profile)
+UserRouter.put('/me', Account.UpdateProfile)
+UserRouter.post('/me/upload-profile-image', Account.UploadProfileImage)
 
-
-// module.exports = { customerRouter }
+module.exports = { UserRouter }

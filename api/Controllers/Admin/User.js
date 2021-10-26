@@ -1,7 +1,5 @@
 
 const User = require("../../../Models/User")
-const CheckId = require("../../Middleware/CheckId")
-const { Host } = require("../../Helpers/Index")
 
 // List of users
 const Index = async (req, res, next) => {

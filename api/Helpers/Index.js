@@ -45,7 +45,7 @@ const SmFileUpload = async (file, uploadpath) => {
         let image = await Jimp.read(file.data)
         await image.resize(200, 200)
         await image.quality(50)
-        const newFile = 'product-' + Date.now() + '.jpg'
+        const newFile = 'user-' + Date.now() + '.jpg'
         await image.write(uploadpath + '/' + newFile)
         return newFile
     } catch (error) {

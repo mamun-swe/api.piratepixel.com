@@ -5,11 +5,11 @@ const { Admin, User } = require("../Middleware/Permission")
 // const { webRouter } = require("./Web")
 const { AuthRouter } = require("./Auth")
 const { AdminRouter } = require("./Admin")
-// const { customerRouter } = require("./Customer")
+const { UserRouter } = require("./User")
 
 // router.use("/web", webRouter)
 router.use("/auth", AuthRouter)
 router.use("/admin", Admin, AdminRouter)
-// router.use("/customer", Customer, customerRouter)
+router.use("/user", User, UserRouter)
 
 module.exports = router
