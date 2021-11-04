@@ -1,13 +1,16 @@
 const express = require('express')
 const AdminRouter = express.Router()
+const Cache = require("../Cache/Index")
 const AdminController = require("../Controllers/Admin/Admin")
 const CategoryController = require("../Controllers/Admin/Category")
 const ProfileController = require("../Controllers/Admin/Profile")
 const UserController = require("../Controllers/Admin/User")
 const TagController = require("../Controllers/Admin/Tags")
+const UploadsController = require("../Controllers/Admin/Uploads")
+const DashboardController = require("../Controllers/Admin/Dashboard")
 
-// const DashboardController = require("../Controllers/Admin/Dashboard")
-
+// ----------- Dashboard Routes ------------
+AdminRouter.get("/dashboard", Cache.Dashboard, DashboardController.Index)
 
 // ----------- Admin Routes ------------
 AdminRouter.get("/", AdminController.Index)
@@ -27,8 +30,9 @@ AdminRouter.get("/user", UserController.Index)
 AdminRouter.get("/tag", TagController.Index)
 AdminRouter.post("/tag", TagController.Store)
 
-// //  ---------- Dashboard Route -----------
-// AdminRouter.get("/dashboard", DashboardController.Index)
+//  ---------- Uploads Route -----------
+AdminRouter.get("/uploads", UploadsController.Index)
+AdminRouter.get("/uploads/:id", UploadsController.Update)
 
 
 module.exports = { AdminRouter }

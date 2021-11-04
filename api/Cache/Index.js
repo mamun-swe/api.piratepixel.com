@@ -77,10 +77,30 @@ const Home = async (req, res, next) => {
     }
 }
 
+// Cache dashboard data
+const Dashboard = async (req, res, next) => {
+    try {
+        const key = "dashboard"
+        RedisClient.get(key, (error, result) => {
+            if (result) {
+                return res.status(200).json({
+                    status: true,
+                    data: JSON.parse(result)
+                })
+            } else {
+                next()
+            }
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
+
 module.exports = {
     RedisClient,
     CategoryList,
     Tags,
     MyMedia,
-    Home
+    Home,
+    Dashboard
 }
