@@ -2,6 +2,7 @@ const Category = require("../../../Models/Category")
 const Validator = require("../../Validator/Category")
 const CheckId = require("../../Middleware/CheckId")
 const { Slug } = require("../../Helpers/Index")
+const { RedisClient } = require("../../Cache/Index")
 
 // Index of categories
 const Index = async (req, res, next) => {
@@ -60,6 +61,8 @@ const Store = async (req, res, next) => {
         })
 
         await newCategory.save()
+        await RedisClient.flushdb()
+
         res.status(201).json({
             status: true,
             message: 'Successfully category cretaed'
@@ -112,6 +115,8 @@ const Update = async (req, res, next) => {
                 message: 'Network error.'
             })
         }
+
+        await RedisClient.flushdb()
 
         return res.status(201).json({
             status: false,

@@ -11,10 +11,6 @@ const ImageSchema = new Schema({
         ref: 'Category',
         required: true
     },
-    tags: [{
-        type: String,
-        default: null
-    }],
     isApproved: {
         type: Boolean,
         default: false,
@@ -32,6 +28,10 @@ const ImageSchema = new Schema({
     }],
 }, {
     timestamps: true
+})
+
+ImageSchema.index({
+    tags: "text"
 })
 
 const Image = model('Image', ImageSchema)

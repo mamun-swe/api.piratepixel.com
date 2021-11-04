@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(nocache())
 
 app.use('/uploads/users', express.static('uploads/users/'))
-app.use('/uploads/images', express.static('uploads/images/'))
+app.use('/uploads/media', express.static('uploads/media/'))
 
 // Routes
 const Route = require('./api/Routes/Index')
